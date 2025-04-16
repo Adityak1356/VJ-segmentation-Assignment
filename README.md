@@ -1,97 +1,50 @@
+# VJ Assignment Execution Instructions
 
-# VJ Assignment - Image Segmentation
-
-## Pre-requisites
-
-1. **Install CUDA** – Ensure your system has CUDA installed.
-2. **Install PyTorch** – Download and install PyTorch from the official website:  
-   [https://pytorch.org/get-started/locally/](https://pytorch.org/get-started/locally/)
-3. **Install required Python libraries** – Run:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. **Navigate to project directory**:
-   ```bash
-   cd <project-folder>
-   ```
+## Pre-requisites:
+1. Install CUDA
+2. Install PyTorch using command from the following link based on your OS, CUDA version etc.  
+   https://pytorch.org/get-started/locally/
+3. Install all the required libraries using:  
+   `pip install -r requirements.txt`
 
 ---
 
-## Task 1: Dataset Preparation
+## Task 1: Dataset Preparation using Python
 
-Create segmentation masks using the following command:
-```bash
-python data_processing.py --iou_limit=0.1
-```
+Create segmentation masks using:  
+   `python data_processing.py --iou_limit=0.1`
 
-### Arguments
+### Arguments:
+`--iou_limit`: If a mask has overlapping segments and segments in the same mask have more than this IoU, they are removed during data processing (default: 0.1)
 
-- `--iou_limit`: Segments in the same mask with IoU greater than this threshold will be considered overlapping and removed. *(Default: 0.1)*
-
-### Inputs
-
-- Images and annotation JSON files
-
-### Outputs
-
-- Segmentation masks (as PNG images)
-
-### Edge Cases Handled
-
-1. **Blank/Invalid Annotations**: Files with no usable segmentation data are removed along with their corresponding images.
-2. **Overlapping Segments**: If segments within a single mask overlap beyond the allowed `--iou_limit`, the image and mask are removed.
+### Edge cases handled:
+1. **Bad annotation files**: Some annotation files are blank or don't contain any useful segmentation information.  
+   Such files and their respective images are removed from the dataset.
+2. **Overlapping segments**: In some segmentation masks, segments overlap within the same mask.  
+   Such files and their respective images are removed from the dataset are removed if their overlap exceeds the `--iou_limit`.
 
 ---
 
 ## Task 2: Train an Image Segmentation Model
 
-### Training
+To train the model:  
+   `python train.py --epochs=5 --output_dir="models"`
 
-To train the model:
-```bash
-python train.py --epochs=5 --output_dir="models"
-```
+If previous training command is not working because TensorBoard launches and training stops:  
+   `python train.py --epochs=5 --output_dir="models" --use_tensorboard=0`
 
-If TensorBoard automatically opens and causes the training to stop:
-```bash
-python train.py --epochs=5 --output_dir="models" --use_tensorboard=0
-```
+To evaluate the model on testing data:  
+   `python eval.py --model_path="models/model.pth" --output_dir="results"`
 
-### Evaluation
-
-To evaluate on the test dataset:
-```bash
-python eval.py --model_path="models/model.pth" --output_dir="results"
-```
-
-### View TensorBoard
-
-To visualize training logs:
-```bash
-tensorboard --logdir="runs"
-```
-
-If you're using a pre-trained model:
-```bash
-python eval.py --model_path="models/april15model.pth" --output_dir="results"
-tensorboard --logdir="mytb"
-```
+To view TensorBoard dashboard:  
+   `tensorboard --logdir="runs"`
 
 ---
 
-## Sample Results (1000 Epochs, 1080Ti GPU, 6 hours)
+## My Results based on model already trained for 1000 epochs:
 
-```
-Test IoU: 0.1487
-Test Dice Coefficient: 0.2255
-Test Pixel Accuracy: 0.9550
-```
+Evaluation on testing data :  
+   `python eval.py --model_path="models/april15model.pth" --output_dir="results"`  
 
----
-
-## Dataset Summary
-
-- **Total Masks Generated**: 3833  
-- **Masks removed due to bad/blank annotations**: 147  
-- **Masks removed due to overlapping segments**: 173  
-- **Remaining Masks**: 3513  
+View Tensorboard dashboard:  
+   `tensorboard --logdir="mytb"`
